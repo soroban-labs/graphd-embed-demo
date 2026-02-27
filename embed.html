@@ -1,0 +1,48 @@
+<!--
+  Soroban Labs — Embed Example
+
+  This is all you need to embed a Soroban simulation on your site.
+  Copy the <iframe> below into your HTML and replace the src with your own values:
+
+    <iframe
+      src="https://graph.sorobanlabs.io/embed?key=YOUR_API_KEY&q=explain projectile motion"
+      width="100%"
+      height="600"
+      style="border: none; border-radius: 8px;"
+      allow="clipboard-write"
+    ></iframe>
+
+  Parameters:
+    key  — your Soroban API key (required)
+    q    — an initial question to pre-fill (optional)
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soroban Embed</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    iframe { width: 100%; height: 100%; border: none; }
+  </style>
+</head>
+<body>
+  <iframe id="embed" allow="clipboard-write"></iframe>
+  <script>
+    // This page is used by the demo (index.html) to preview the embed.
+    // For your own site, just use the <iframe> snippet in the comment above.
+    const params = new URLSearchParams(window.location.search);
+    const base = params.get('url') || 'https://graph.sorobanlabs.io';
+    const key = params.get('key') || '';
+    const q = params.get('q') || '';
+
+    const embedParams = new URLSearchParams();
+    if (key) embedParams.set('key', key);
+    if (q) embedParams.set('q', q);
+
+    document.getElementById('embed').src = base + '/embed?' + embedParams.toString();
+  </script>
+</body>
+</html>

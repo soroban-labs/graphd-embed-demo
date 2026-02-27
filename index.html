@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soroban Labs Embed Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fafafa; color: #18181b; }
+    .header { border-bottom: 1px solid #e4e4e7; background: #fff; padding: 16px 24px; }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .header p { font-size: 13px; color: #71717a; margin-top: 2px; }
+    .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 24px; }
+    .card { background: #fff; border: 1px solid #e4e4e7; border-radius: 8px; padding: 24px; }
+    .card h2 { font-size: 11px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    label { display: block; font-size: 13px; font-weight: 500; color: #52525b; margin-bottom: 4px; }
+    input { width: 100%; padding: 8px 12px; border: 1px solid #e4e4e7; border-radius: 6px; font-size: 13px; color: #18181b; outline: none; }
+    input:focus { border-color: #18181b; box-shadow: 0 0 0 1px #18181b; }
+    input::placeholder { color: #a1a1aa; }
+    .actions { display: flex; align-items: center; gap: 12px; }
+    button { padding: 8px 16px; font-size: 13px; font-weight: 500; border-radius: 6px; cursor: pointer; border: none; transition: background 0.15s; }
+    .btn-primary { background: #18181b; color: #fff; }
+    .btn-primary:hover { background: #27272a; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-ghost { background: none; color: #71717a; padding: 8px; }
+    .btn-ghost:hover { color: #18181b; }
+    .hint { font-size: 13px; color: #a1a1aa; }
+    .code-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    pre { background: #09090b; color: #d4d4d8; padding: 16px; border-radius: 6px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; overflow-x: auto; white-space: pre; }
+    .preview-frame { border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; height: 600px; background: #fff; }
+    .preview-frame iframe { width: 100%; height: 100%; border: none; }
+    #preview-section { display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Soroban Labs Embed</h1>
+    <p>Test and preview embeddable simulations</p>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Configuration</h2>
+      <div class="fields">
+        <div>
+          <label for="api-key">API Key</label>
+          <input type="text" id="api-key" placeholder="your_api_key" style="font-family: 'SF Mono', 'Fira Code', monospace;">
+        </div>
+        <div>
+          <label for="question">Initial Question</label>
+          <input type="text" id="question" placeholder="explain projectile motion">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="launch-btn" onclick="launch()" disabled>Launch Preview</button>
+        <span class="hint" id="hint-text">Enter an API key to get started</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="code-header">
+        <h2 style="margin-bottom: 0;">Embed Code</h2>
+        <button class="btn-ghost" onclick="copyCode()">Copy</button>
+      </div>
+      <pre id="embed-code"></pre>
+    </div>
+
+    <div id="preview-section">
+      <h2 style="font-size: 11px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">Live Preview</h2>
+      <div class="preview-frame">
+        <iframe id="preview-iframe"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const EMBED_BASE = 'https://graph.sorobanlabs.io';
+    const apiKeyInput = document.getElementById('api-key');
+    const questionInput = document.getElementById('question');
+    const launchBtn = document.getElementById('launch-btn');
+    const hintText = document.getElementById('hint-text');
+    const embedCodeEl = document.getElementById('embed-code');
+    const previewSection = document.getElementById('preview-section');
+    const previewIframe = document.getElementById('preview-iframe');
+
+    function generateEmbedSrc() {
+      const params = new URLSearchParams();
+      if (apiKeyInput.value) params.set('key', apiKeyInput.value);
+      if (questionInput.value) params.set('q', questionInput.value);
+      return EMBED_BASE + '/embed?' + params.toString();
+    }
+
+    function updateEmbedCode() {
+      const src = generateEmbedSrc();
+      embedCodeEl.textContent = '<iframe\n  src="' + src + '"\n  width="100%"\n  height="600"\n  style="border: none; border-radius: 8px;"\n  allow="clipboard-write"\n/>';
+
+      launchBtn.disabled = !apiKeyInput.value;
+      hintText.style.display = apiKeyInput.value ? 'none' : 'inline';
+    }
+
+    function launch() {
+      const params = new URLSearchParams();
+      params.set('url', EMBED_BASE);
+      if (apiKeyInput.value) params.set('key', apiKeyInput.value);
+      if (questionInput.value) params.set('q', questionInput.value);
+      previewIframe.src = 'embed.html?' + params.toString();
+      previewSection.style.display = 'block';
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(embedCodeEl.textContent).then(() => {
+        const btn = document.querySelector('.btn-ghost');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    apiKeyInput.addEventListener('input', updateEmbedCode);
+    questionInput.addEventListener('input', updateEmbedCode);
+    updateEmbedCode();
+  </script>
+</body>
+</html>
